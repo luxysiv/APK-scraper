@@ -93,3 +93,15 @@ apkpure() {
     url=$(req - "$url" | grep 'Download APK' | grep -oP 'href="\Khttps://d\.apkpure\.net/b/APK[^"]*' | uniq)
     req $name-v$version.apk $url
 }
+
+# Usage examples
+apkmirror "google-inc" \
+          "youtube-music" \
+          "com.google.android.apps.youtube.music" \
+          "arm64-v8a"
+
+uptodown "youtube-music" \
+         "com.google.android.apps.youtube.music"
+
+apkpure "youtube-music" \
+        "com.google.android.apps.youtube.music"
