@@ -47,6 +47,21 @@ apkmirror() {
     req $name-v$version.apk $url
 }
 
+apkmirror() {
+    org="$1" name="$2" package="$3" arch="$4"
+    version=$(req - 2>/dev/null $api | get_supported_version "$package")
+    url="https://www.apkmirror.com/uploads/?appcategory=$name"
+    version="${version:-$(req - $url | pup 'div.widget_appmanager_recentpostswidget h5 a.fontBlack text{}' | get_latest_version)}"
+    url="https://www.apkmirror.com/apk/$org/$name/$name-${version//./-}-release"
+    url="https://www.apkmirror.com$( req - $url | pup -p --charset utf-8 ':parent-of(:parent-of(span:contains("APK")))' \
+                                                | pup -p --charset utf-8 ':parent-of(div:contains("'$arch'"))' \
+                                                | pup -p --charset utf-8 ':parent-of(div:contains("nodpi")) a.accent_color attr{href}' \
+                                                | sed 1q )"
+    url="https://www.apkmirror.com$( req - $url | pup -p --charset utf-8 'a.downloadButton attr{href}')"
+    url="https://www.apkmirror.com$( req - $url | pup -p --charset utf-8 'a[data-google-vignette="false"][rel="nofollow"] attr{href}')"
+    req $name-v$version.apk $url
+}
+
 # X not work (maybe more)
 uptodown() {
     name=$1 package=$2
@@ -73,6 +88,18 @@ uptodown() {
     req $name-v$version.apk $url
 }
 
+uptodown() {
+    name="$1" package="$2"
+    version=$(req - 2>/dev/null $api | get_supported_version "$package")
+    url="https://$name.en.uptodown.com/android/versions"
+    version="${version:-$(req - 2>/dev/null $url | pup 'div#versions-items-list > div span.version text{}' | get_latest_version)}"
+    url=$(req - $url | pup -p --charset utf-8 ':parent-of(span:contains("'$version'"))' \
+                     | pup -p --charset utf-8 'div[data-url]' attr{data-url} \
+                     | sed 's#/download/#/post-download/#g;q')
+    url="https://dw.uptodown.com/dwn/$(req - "$url" | pup -p --charset utf-8 'div[class="post-download"]' attr{data-url})"
+    req $name-v$version.apk $url
+}
+
 # Tiktok not work because not available version supported 
 apkpure() {
     name=$1 package=$2
@@ -91,6 +118,16 @@ apkpure() {
     version="${version:-$(req - "$url" | grep -oP 'data-dt-version="\K[^"]*' | sed 10q | get_latest_version)}"
     url="https://apkpure.net/$name/$package/download/$version"
     url=$(req - "$url" | grep 'Download APK' | grep -oP 'href="\Khttps://d\.apkpure\.net/b/APK[^"]*' | uniq)
+    req $name-v$version.apk $url
+}
+
+apkpure() {
+    name="$1" package="$2"
+    version=$(req - 2>/dev/null $api | get_supported_version "$package")
+    url="https://apkpure.net/$name/$package/versions"
+    version="${version:-$(req - $url | pup 'div.ver-item > div.ver-item-n text{}' | get_latest_version)}"
+    url="https://apkpure.net/$name/$package/download/$version"
+    url=$(req - $url | pup -p --charset utf-8 'a[href*="APK/'$package'"] attr{href}')
     req $name-v$version.apk $url
 }
 
