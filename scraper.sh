@@ -1,11 +1,12 @@
 #!/bin/bash
 api="https://api.revanced.app/v2/patches/latest"
 
-req() {    
-    wget --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:108.0) Gecko/20100101 Firefox/108.0" \
-         --header="Authorization: Basic YXBpLWFwa3VwZGF0ZXI6cm01cmNmcnVVakt5MDRzTXB5TVBKWFc4" \
-         --header="Content-Type: application/json" \
-         --no-verbose --output-document="$1" "$2" 
+req() {
+    wget --no-verbose --output-document="$1" "$2" \
+    --header="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+                          AppleWebKit/537.36 (HTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36" \
+    --header="Authorization: Basic YXBpLWFwa3VwZGF0ZXI6cm01cmNmcnVVakt5MDRzTXB5TVBKWFc4" \
+    --header="Content-Type: application/json"
 }
 
 get_latest_version() {
