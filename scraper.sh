@@ -2,12 +2,13 @@
 api="https://api.revanced.app/v2/patches/latest"
 
 req() {
-    wget --no-verbose --output-document="$1" "$2" \
-    --header="User-Agent: Mozilla/5.0 (Linux; Android 10; K) \
-                          AppleWebKit/537.36 (KHTML, like Gecko) \
-                          Chrome/126.0.0.0 Mobile Safari/537.36 EdgA/126.0.0.0" \
-    --header="Authorization: Basic YXBpLWFwa3VwZGF0ZXI6cm01cmNmcnVVakt5MDRzTXB5TVBKWFc4" \
-    --header="Content-Type: application/json"
+    wget --header="User-Agent: Mozilla/5.0 (Linux; Android 10; K) \
+                               AppleWebKit/537.36 (KHTML, like Gecko) \
+                               Chrome/126.0.0.0 Mobile Safari/537.36 EdgA/126.0.0.0" \
+         --header="Authorization: Basic YXBpLWFwa3VwZGF0ZXI6cm01cmNmcnVVakt5MDRzTXB5TVBKWFc4" \
+         --header="Content-Type: application/octet-stream" \
+         --header="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8" \
+         --keep-session-cookies --timeout=10 -nv -O "$@"
 }
 
 get_latest_version() {
@@ -129,7 +130,7 @@ apkpure() {
     url="https://apkpure.net/$name/$package/versions"
     version="${version:-$(req - $url | pup 'div.ver-item > div.ver-item-n text{}' | get_latest_version)}"
     url="https://apkpure.net/$name/$package/download/$version"
-    url=$(req - $url | pup -p --charset utf-8 'a[href*="APK/'$package'"] attr{href}')
+    url=$(req - $url | pup -p --charset utf-8 'a[href*="APK/'$package'"] attr{href}' | uniq)
     req $name-v$version.apk $url
 }
 
