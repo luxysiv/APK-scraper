@@ -2,13 +2,14 @@
 api="https://api.revanced.app/v2/patches/latest"
 
 req() {
-    wget --header="User-Agent: Mozilla/5.0 (Linux; Android 10; K) \
-                               AppleWebKit/537.36 (KHTML, like Gecko) \
-                               Chrome/126.0.0.0 Mobile Safari/537.36 EdgA/126.0.0.0" \
-         --header="Authorization: Basic YXBpLWFwa3VwZGF0ZXI6cm01cmNmcnVVakt5MDRzTXB5TVBKWFc4" \
+    wget --header="User-Agent: Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0" \
          --header="Content-Type: application/octet-stream" \
+         --header="Accept-Language: en-US,en;q=0.9" \
+         --header="Connection: keep-alive" \
+         --header="Upgrade-Insecure-Requests: 1" \
+         --header="Cache-Control: max-age=0" \
          --header="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8" \
-         --keep-session-cookies --timeout=10 -nv -O "$@"
+         --keep-session-cookies --timeout=30 -nv -O "$@"
 }
 
 get_latest_version() {
@@ -82,12 +83,10 @@ uptodown() {
     name=$1 package=$2
     version=$(req - 2>/dev/null $api | get_supported_version "$package")
     url="https://$name.en.uptodown.com/android/versions"
-    version="${version:-$(req - 2>/dev/null "$url" | grep -oP 'class="version">\K[^<]+' | get_latest_version)}"
-    url=$(req - "$url" | grep -B3 '"version">'$version'<' \
-                       | grep -oP 'data-url="\K[^"]*' \
-                       | grep -m 1 "." \
-                       | sed 's/\/download\//\/post-download\//g')
-    url="https://dw.uptodown.com/dwn/$(req - "$url" | grep 'class="post-download"' | grep -oP 'data-url="\K[^"]+')"
+    version="${version:-$(req - 2>/dev/null $url | grep -oP 'class="version">\K[^<]+' | get_latest_version)}"
+    url=$(req - $url | grep -B3 '"version">'$version'<' \
+                     | perl -ne 's/\/download\//\/post-download\//g ; print "$1\n" if /.*data-url="([^"]*)".*/ && ++$i == 1;')
+    url="https://dw.uptodown.com/dwn/$(req - $url | perl -ne ' print "$1\n" if /.*"post-download" data-url="([^"]*)".*/')"
     req $name-v$version.apk $url
 }
 
