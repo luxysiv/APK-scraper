@@ -117,9 +117,9 @@ apkpure() {
     name=$1 package=$2
     url="https://apkpure.net/$name/$package/versions"
     version=$(req - 2>/dev/null $api | get_supported_version "$package")
-    version="${version:-$(req - "$url" | grep -oP 'data-dt-version="\K[^"]*' | sed 10q | get_latest_version)}"
+    version="${version:-$(req - $url | grep -oP 'data-dt-version="\K[^"]*' | sed 10q | get_latest_version)}"
     url="https://apkpure.net/$name/$package/download/$version"
-    url=$(req - "$url" | grep 'Download APK' | grep -oP 'href="\Khttps://d\.apkpure\.net/b/APK[^"]*' | uniq)
+    url=$(req - $url | perl -ne 'print "$1\n" if /.*href="([^"]*\/APK\/'$package'[^"]*)".*/ && ++$i == 1;')
     req $name-v$version.apk $url
 }
 
