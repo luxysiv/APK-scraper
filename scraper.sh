@@ -43,10 +43,10 @@ apkmirror() {
     url="https://www.apkmirror.com/uploads/?appcategory=$name"
     version="${version:-$(req - $url | get_apkmirror_version | get_latest_version )}"
     url="https://www.apkmirror.com/apk/$org/$name/$name-${version//./-}-release"
-    url="https://www.apkmirror.com$(req - $url | grep -B5 -A10 '>APK<' | grep -B13 -A2 '>'$arch'<' \
-                                               | grep -B15 '>nodpi</d' | sed -n 's/.*href="\([^"]*\)".*/\1/p;q')"
-    url="https://www.apkmirror.com$(req - $url | grep 'downloadButton' | sed -n 's/.*href="\([^"]*\)".*/\1/p;q')"
-    url="https://www.apkmirror.com$(req - $url | grep 'rel="nofollow"' | sed -n 's/.*href="\([^"]*\)".*/\1/g;s#amp;##g;p;q')"
+    url="https://www.apkmirror.com$(req - $url | grep '>nodpi<' -B15 | grep '>'$arch'<' -B13 | grep '>APK<' -B5 \
+                                               | perl -ne 'print "$1\n" if /.*href="([^"]*download\/)".*/ && ++$i == 1;')"
+    url="https://www.apkmirror.com$(req - $url | perl -ne 'print "$1\n" if /.*href="([^"]*key=[^"]*)".*/')"
+    url="https://www.apkmirror.com$(req - $url | perl -ne 's/amp;//g; print "$1\n" if /.*href="([^"]*key=[^"]*)".*/')"
     req $name-v$version.apk $url
 }
 
